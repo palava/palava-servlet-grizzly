@@ -24,6 +24,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import de.cosmocode.palava.core.DefaultRegistryModule;
 import de.cosmocode.palava.core.inject.TypeConverterModule;
 import de.cosmocode.palava.core.lifecycle.LifecycleModule;
+import de.cosmocode.palava.servlet.EchoServlet;
 import de.cosmocode.palava.servlet.WebappModule;
 
 /**
@@ -45,9 +46,9 @@ public final class ApplicationTestModule extends WebappModule {
         install(new TypeConverterModule());
         install(new GrizzlyModule());
         
-//        addWebapp("src/test/resources/grizzly/examples", "/sample");
+        addWebapp("src/test/resources/grizzly/examples", "/sample");
         
-        serve("/test").with(TestServlet.class);
+        serve("/echo").with(EchoServlet.class);
     }
 
 }
