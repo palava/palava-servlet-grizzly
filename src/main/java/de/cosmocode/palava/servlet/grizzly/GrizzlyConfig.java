@@ -29,7 +29,7 @@ public final class GrizzlyConfig {
     
     public static final String PORT = PREFIX + "port";
     
-    public static final String WEB_RESOURCES_PATH = PREFIX + "webResourcePath";
+    public static final String WEB_RESOURCES_PATH = PREFIX + "webResourcesPath";
     
     public static final String SECURE = PREFIX + "secure";
     

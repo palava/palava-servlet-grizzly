@@ -22,17 +22,20 @@ import java.util.Set;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+import javax.servlet.Filter;
 
-import org.glassfish.grizzly.web.Management;
-import org.glassfish.grizzly.web.embed.GrizzlyWebServer;
-import org.glassfish.grizzly.web.servlet.ServletAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
+import com.google.inject.internal.Maps;
 import com.google.inject.internal.Sets;
 import com.google.inject.name.Named;
+import com.google.inject.servlet.GuiceFilter;
+import com.sun.grizzly.http.Management;
+import com.sun.grizzly.http.embed.GrizzlyWebServer;
+import com.sun.grizzly.http.servlet.deployer.WebAppAdapter;
 
 import de.cosmocode.palava.core.lifecycle.AutoStartable;
 import de.cosmocode.palava.core.lifecycle.Initializable;
@@ -48,9 +51,11 @@ final class Grizzly implements Initializable, AutoStartable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Grizzly.class);
     
-    private int port = 8080;
+    private final File webResourcesPath;
     
-    private File webResourcesPath;
+    private final Filter guiceFilter;
+    
+    private int port = 8080;
     
     private boolean secure;
 
@@ -59,15 +64,16 @@ final class Grizzly implements Initializable, AutoStartable {
     private MBeanServer beanServer;
     
     private GrizzlyWebServer grizzly;
-
-    @Inject(optional = true)
-    void setPort(@Named(GrizzlyConfig.PORT) int port) {
-        this.port = port;
+    
+    @Inject
+    public Grizzly(@Named(GrizzlyConfig.WEB_RESOURCES_PATH) File webResourcesPath, GuiceFilter filter) {
+        this.webResourcesPath = Preconditions.checkNotNull(webResourcesPath, "WebResourcesPath");
+        this.guiceFilter = Preconditions.checkNotNull(filter, "GuiceFilter");
     }
     
     @Inject(optional = true)
-    void setWebResourcesPath(@Named(GrizzlyConfig.WEB_RESOURCES_PATH) File webResourcesPath) {
-        this.webResourcesPath = Preconditions.checkNotNull(webResourcesPath, "WebResourcesPath");
+    void setPort(@Named(GrizzlyConfig.PORT) int port) {
+        this.port = port;
     }
     
     @Inject(optional = true)
@@ -93,9 +99,12 @@ final class Grizzly implements Initializable, AutoStartable {
         
         for (Webapp webapp : webapps) {
             LOG.info("Configuring webapp {}", webapp);
-            final ServletAdapter adapter = new ServletAdapter();
+
+            final WebAppAdapter adapter = new WebAppAdapter();
+            adapter.setHandleStaticResources(true);
             adapter.setRootFolder(webapp.getLocation());
-            
+            adapter.setContextPath(webapp.getContext());
+            adapter.addFilter(guiceFilter, GuiceFilter.class.getName(), Maps.newHashMap());
             grizzly.addGrizzlyAdapter(adapter, new String[] {
                 webapp.getContext()
             });
