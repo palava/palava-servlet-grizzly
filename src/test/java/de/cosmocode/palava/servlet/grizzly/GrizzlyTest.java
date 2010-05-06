@@ -19,7 +19,7 @@ package de.cosmocode.palava.servlet.grizzly;
 import org.junit.Test;
 
 import de.cosmocode.palava.core.Framework;
-import de.cosmocode.palava.core.FrameworkLoader;
+import de.cosmocode.palava.core.Palava;
 
 /**
  * Tests {@link Grizzly}.
@@ -33,7 +33,7 @@ public final class GrizzlyTest {
      */
     @Test
     public void start() {
-        final Framework framework = FrameworkLoader.load();
+        final Framework framework = Palava.newFramework();
         try {   
             framework.start();
             Thread.sleep(30 * 1000);
