@@ -142,6 +142,6 @@ final class Grizzly implements Initializable, AutoStartable {
     @Override
     public void stop() throws LifecycleException {
         grizzly.stop();
-    };
+    }
     
 }
